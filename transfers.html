@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Перевозки — Весенний</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 12px;
+            min-height: 100vh;
+            color: #1b1f23;
+        }
+
+        .fb-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Карточка-заголовок */
+        .fb-header {
+            background: white;
+            border-radius: 20px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            border: 1px solid #e4e6eb;
+        }
+
+        .back-link {
+            color: #1877f2;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .fb-header h1 {
+            flex: 1;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1877f2, #0b5dd6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-right: 40px; /* компенсация для центрирования */
+        }
+
+        /* Карточка формы */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e4e6eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+
+        .fb-select, .fb-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1.5px solid #e4e6eb;
+            font-size: 16px;
+            background: white;
+            transition: border 0.15s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .fb-select:focus, .fb-input:focus {
+            border-color: #1877f2;
+            outline: none;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            background: #f7f8fa;
+            border-radius: 14px;
+            padding: 10px 14px;
+            border: 1.5px dashed #ccd0d5;
+            text-align: center;
+            color: #65676b;
+            font-size: 15px;
+        }
+
+        .file-input-wrapper input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper span {
+            pointer-events: none;
+        }
+
+        .fb-btn-primary {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 14px 18px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 17px;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s, transform 0.05s;
+            box-shadow: 0 2px 8px rgba(24,119,242,0.2);
+        }
+
+        .fb-btn-primary:active {
+            transform: scale(0.98);
+            background: #166fe0;
+        }
+
+        /* Список перевозок */
+        .transfers-list {
+            background: transparent;
+            border-radius: 20px;
+        }
+
+        .transfer-card {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e4e6eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .transfer-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid #e4e6eb;
+        }
+
+        .transfer-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .transfer-photo .no-photo {
+            color: #8a8d91;
+            font-size: 24px;
+        }
+
+        .transfer-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .transfer-route {
+            font-weight: 700;
+            font-size: 17px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #1b1f23;
+        }
+
+        .transfer-route .arrow {
+            color: #1877f2;
+            font-weight: 600;
+        }
+
+        .transfer-details {
+            font-size: 14px;
+            color: #65676b;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+
+        .transfer-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .transfer-delete {
+            background: none;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 30px;
+            background: #f0f2f5;
+            color: #e41e3f;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .transfer-delete:active {
+            background: #e4e6eb;
+        }
+
+        .empty-list {
+            background: white;
+            border-radius: 18px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #65676b;
+            font-size: 16px;
+            border: 1px solid #e4e6eb;
+        }
+
+        /* Адаптация для очень маленьких экранов */
+        @media (max-width: 400px) {
+            body { padding: 8px; }
+            .fb-header h1 { font-size: 20px; margin-right: 30px; }
+            .transfer-card { flex-wrap: wrap; }
+            .transfer-delete { margin-left: auto; }
+        }
+    </style>
+</head>
+<body>
+<div class="fb-container">
+    <!-- Заголовок с кнопкой "Назад" -->
+    <div class="fb-header">
+        <a href="/" class="back-link">← Назад</a>
+        <h1>Перевозки</h1>
+    </div>
+
+    <!-- Форма добавления -->
+    <div class="form-card">
+        <div class="form-group">
+            <label>📍 Откуда</label>
+            <select id="fromHall" class="fb-select">
+                <option value="">Выберите зал</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>🏁 Куда</label>
+            <select id="toHall" class="fb-select">
+                <option value="">Выберите зал</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>📦 Что везём</label>
+            <input type="text" id="item" class="fb-input" placeholder="Например: стулья, декор">
+        </div>
+        <div class="form-group">
+            <label>📅 Дата</label>
+            <input type="date" id="date" class="fb-input">
+        </div>
+        <div class="form-group">
+            <div class="file-input-wrapper">
+                <span>📸 Нажмите, чтобы добавить фото</span>
+                <input type="file" id="photo" accept="image/*" capture="environment">
+            </div>
+        </div>
+        <button class="fb-btn-primary" id="addBtn">➕ Добавить перевозку</button>
+    </div>
+
+    <!-- Список перевозок -->
+    <div id="list" class="transfers-list">
+        <div class="empty-list">Загрузка...</div>
+    </div>
+</div>
+
+<script>
+    // ---------- Загрузка залов ----------
+    async function loadHalls() {
+        try {
+            const res = await fetch('/api/get_halls');
+            const halls = await res.json();
+            const fromSelect = document.getElementById('fromHall');
+            const toSelect = document.getElementById('toHall');
+
+            fromSelect.innerHTML = '<option value="">Выберите зал</option>';
+            toSelect.innerHTML = '<option value="">Выберите зал</option>';
+
+            halls.forEach(hall => {
+                const opt1 = document.createElement('option');
+                opt1.value = hall;
+                opt1.textContent = hall;
+                fromSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = hall;
+                opt2.textContent = hall;
+                toSelect.appendChild(opt2);
+            });
+        } catch (e) {
+            console.error('Ошибка загрузки залов:', e);
+            alert('Не удалось загрузить список залов');
+        }
+    }
+
+    // ---------- Загрузка списка перевозок ----------
+    async function loadTransfers() {
+        const container = document.getElementById('list');
+        try {
+            const res = await fetch('/api/get_transfers');
+            const transfers = await res.json();
+
+            if (!transfers.length) {
+                container.innerHTML = '<div class="empty-list">📭 Нет перевозок</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            transfers.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'transfer-card';
+
+                // Фото
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'transfer-photo';
+                if (t.photo_url) {
+                    const img = document.createElement('img');
+                    img.src = t.photo_url;
+                    img.alt = t.item_name;
+                    photoDiv.appendChild(img);
+                } else {
+                    photoDiv.innerHTML = '<span class="no-photo">📦</span>';
+                }
+
+                // Информация
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'transfer-info';
+
+                const routeDiv = document.createElement('div');
+                routeDiv.className = 'transfer-route';
+                routeDiv.innerHTML = `${t.from_hall} <span class="arrow">→</span> ${t.to_hall}`;
+
+                const detailsDiv = document.createElement('div');
+                detailsDiv.className = 'transfer-details';
+                detailsDiv.innerHTML = `
+                    <span>📦 ${t.item_name}</span>
+                    <span>📅 ${t.transfer_date}</span>
+                `;
+
+                infoDiv.appendChild(routeDiv);
+                infoDiv.appendChild(detailsDiv);
+
+                // Кнопка удаления
+                const delBtn = document.createElement('button');
+                delBtn.className = 'transfer-delete';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = 'Удалить';
+                delBtn.onclick = () => deleteTransfer(t.id);
+
+                card.appendChild(photoDiv);
+                card.appendChild(infoDiv);
+                card.appendChild(delBtn);
+                container.appendChild(card);
+            });
+        } catch (e) {
+            console.error('Ошибка загрузки перевозок:', e);
+            container.innerHTML = '<div class="empty-list">❌ Ошибка загрузки</div>';
+        }
+    }
+
+    // ---------- Удаление перевозки ----------
+    window.deleteTransfer = async function(id) {
+        if (!confirm('Удалить эту перевозку?')) return;
+
+        try {
+            const res = await fetch('/api/delete_transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if (res.ok) {
+                await loadTransfers();
+            } else {
+                alert('Не удалось удалить');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка соединения');
+        }
+    };
+
+    // ---------- Добавление перевозки ----------
+    async function addTransfer() {
+        const from = document.getElementById('fromHall').value;
+        const to = document.getElementById('toHall').value;
+        const item = document.getElementById('item').value.trim();
+        const date = document.getElementById('date').value;
+
+        if (!from || !to || !item || !date) {
+            alert('Пожалуйста, заполните все обязательные поля');
+            return;
+        }
+
+        if (from === to) {
+            alert('Залы отправления и назначения должны различаться');
+            return;
+        }
+
+        let photoUrl = '';
+        const fileInput = document.getElementById('photo');
+        const file = fileInput.files[0];
+        if (file) {
+            // Преобразуем в base64 для хранения (как в оригинале)
+            photoUrl = await new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const payload = {
+            from_hall: from,
+            to_hall: to,
+            item_name: item,
+            photo_url: photoUrl,
+            transfer_date: date
+        };
+
+        try {
+            const res = await fetch('/api/save_transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                // Очищаем поля
+                document.getElementById('item').value = '';
+                document.getElementById('date').value = '';
+                fileInput.value = '';
+                await loadTransfers();
+            } else {
+                alert('Ошибка сохранения');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка соединения');
+        }
+    }
+
+    // ---------- Инициализация ----------
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHalls();
+        loadTransfers();
+        document.getElementById('addBtn').addEventListener('click', addTransfer);
+    });
+
+    // Удобство: при выборе файла показываем его имя (опционально)
+    document.getElementById('photo').addEventListener('change', function(e) {
+        const wrapper = this.closest('.file-input-wrapper');
+        const span = wrapper.querySelector('span');
+        if (this.files.length > 0) {
+            span.textContent = `📎 ${this.files[0].name}`;
+        } else {
+            span.textContent = '📸 Нажмите, чтобы добавить фото';
+        }
+    });
+</script>
+</body>
+</html>

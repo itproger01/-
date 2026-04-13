@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Учет расходов — Весенний</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ---------- ОБЩИЕ СТИЛИ FACEBOOK ---------- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 12px;
+            min-height: 100vh;
+            color: #1b1f23;
+        }
+        .fb-container { max-width: 100%; margin: 0 auto; }
+
+        /* Хедер */
+        .fb-header {
+            background: white;
+            border-radius: 20px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e4e6eb;
+        }
+        .fb-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #1877f2, #0b5dd6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .menu-trigger-fb {
+            background: #e4e6eb;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-trigger-fb:active { background: #d0d4d9; }
+
+        /* Кнопки залов */
+        .halls-card {
+            background: white;
+            border-radius: 20px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            white-space: nowrap;
+            display: flex;
+            gap: 8px;
+            border: 1px solid #e4e6eb;
+        }
+        .hall-btn-fb {
+            background: #f0f2f5;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .hall-btn-fb.active {
+            background: #1877f2;
+            color: white;
+            box-shadow: 0 2px 6px rgba(24,119,242,0.3);
+        }
+
+        /* Календарь */
+        .calendar-card {
+            background: white;
+            border-radius: 24px;
+            padding: 16px 12px;
+            margin-bottom: 16px;
+            border: 1px solid #e4e6eb;
+            overflow-x: auto;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .month-nav-fb {
+            background: #f0f2f5;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .month-year {
+            font-weight: 700;
+            font-size: 18px;
+        }
+        .calendar-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 5px;
+            table-layout: fixed;
+        }
+        .calendar-table th {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #65676b;
+            padding: 8px 0;
+        }
+        .cal-day-cell {
+            background: #f7f8fa;
+            border-radius: 14px;
+            padding: 12px 2px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #e4e6eb;
+            transition: all 0.15s;
+        }
+        .cal-day-cell:active { transform: scale(0.96); background: #e4e6eb; }
+        /* ЗЕЛЁНЫЙ ЦВЕТ ЗАМЕНЁН НА #93f5ad */
+        .cal-day-cell.green { background: #93f5ad; border-color: #2ecc71; }
+        /* ЯРКО-КРАСНЫЙ ДЛЯ НЕЗАПОЛНЕННЫХ ДНЕЙ */
+        .cal-day-cell.red { background: #f5a2a2; border-color: #ff0000; box-shadow: 0 0 0 1px #ff000033; }
+        .cal-day-cell.empty { background: #f7f8fa; opacity: 0.5; cursor: default; }
+        .day-number { font-weight: 700; font-size: 16px; }
+
+        /* ---------- ТАБЛИЦА ДЕТАЛИЗАЦИИ ---------- */
+        .monthly-detail-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e4e6eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .monthly-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .monthly-detail-header h3 {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1b1f23;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fb-btn-outline {
+            background: transparent;
+            border: 1.5px solid #1877f2;
+            color: #1877f2;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fb-btn-outline:active {
+            background: #e7f3ff;
+            transform: scale(0.97);
+        }
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 20px;
+            background: #fafbfc;
+            padding: 4px;
+        }
+        .fb-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            font-size: 16px;
+            min-width: 560px;
+        }
+        .fb-table th {
+            text-align: left;
+            padding: 14px 16px;
+            background: #f7f8fa;
+            font-weight: 600;
+            color: #65676b;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid #e4e6eb;
+        }
+        .fb-table td {
+            padding: 16px 16px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
+            border: 1px solid #eef0f2;
+            vertical-align: middle;
+            transition: all 0.15s;
+        }
+        .fb-table tbody tr:hover td {
+            background: #fdfdfe;
+            border-color: #d0d7de;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .fb-table td:first-child {
+            font-weight: 600;
+            color: #1b1f23;
+        }
+        .fb-table td:not(:first-child) {
+            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
+            letter-spacing: 0.2px;
+            font-weight: 500;
+        }
+        .fb-table .total-row td {
+            background: #f0f5ff;
+            font-weight: 700;
+            border: 1px solid #c5d5f0;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(24,119,242,0.05);
+        }
+        .empty-table-msg {
+            text-align: center;
+            color: #65676b;
+            padding: 32px !important;
+            background: #f7f8fa !important;
+            border-radius: 24px !important;
+            font-style: italic;
+            font-size: 16px;
+        }
+
+        /* ---------- МОДАЛЬНОЕ ОКНО РАСХОДОВ ---------- */
+        .fb-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(3px);
+            z-index: 1200;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .fb-modal-card {
+            background: white;
+            width: 100%;
+            max-width: 460px;
+            border-radius: 28px;
+            padding: 24px 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            border: 1px solid #e4e6eb;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1b1f23;
+        }
+        .close-icon {
+            background: #e4e6eb;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+        }
+        .close-icon:active { background: #d0d4d9; }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #4b5563;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1.5px solid #e4e6eb;
+            font-size: 16px;
+            background: white;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus {
+            border-color: #1877f2;
+            box-shadow: 0 0 0 4px rgba(24,119,242,0.1);
+            outline: none;
+        }
+        .calc-summary {
+            background: #f7f8fa;
+            padding: 14px 16px;
+            border-radius: 18px;
+            margin: 18px 0;
+            font-size: 15px;
+        }
+        .total-fb {
+            background: #1877f2;
+            color: white;
+            text-align: center;
+            padding: 16px;
+            border-radius: 20px;
+            margin: 16px 0;
+            font-weight: 700;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(24,119,242,0.2);
+        }
+        .auto-save-hint {
+            font-size: 13px;
+            color: #65676b;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .fb-btn-secondary {
+            background: #e4e6eb;
+            color: #1b1f23;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .fb-btn-secondary:active { background: #d0d4d9; }
+
+        /* ---------- БОКОВОЕ МЕНЮ ---------- */
+        .fb-drawer {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh;
+            background: white; z-index: 1000; transition: left 0.3s;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+            padding: 24px 0; border-right: 1px solid #e4e6eb;
+        }
+        .fb-drawer.open { left: 0; }
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 999; display: none;
+        }
+        .drawer-overlay.open { display: block; }
+        .drawer-header { padding: 0 20px 20px 20px; border-bottom: 1px solid #e4e6eb; }
+        .drawer-menu-item {
+            padding: 14px 20px; display: flex; align-items: center; gap: 16px;
+            font-size: 17px; font-weight: 500; cursor: pointer; border-radius: 12px;
+            margin: 4px 12px; text-decoration: none; color: inherit;
+        }
+        .drawer-menu-item:hover { background: #f0f2f5; }
+        .chart-container-mobile {
+            position: relative;
+            height: 180px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .chart-inside-menu {
+            margin: 20px 12px; padding: 16px; background: #f7f8fa; border-radius: 24px;
+        }
+
+        /* Админ-панель */
+        .admin-drawer {
+            position: fixed; top: 0; right: -100%; width: 90%; max-width: 400px;
+            height: 100vh; background: white; z-index: 1300; transition: right 0.3s;
+            padding: 24px 20px; overflow-y: auto; border-left: 1px solid #e4e6eb;
+        }
+        .admin-drawer.open { right: 0; }
+        .admin-section {
+            background: #f7f8fa; border-radius: 20px; padding: 16px; margin-bottom: 20px;
+        }
+        .admin-item {
+            display: flex; justify-content: space-between; background: white;
+            padding: 12px 16px; border-radius: 16px; margin-bottom: 8px; font-size: 15px;
+        }
+        .fb-btn-primary {
+            background: #1877f2; color: white; border: none; padding: 14px;
+            border-radius: 30px; font-weight: 600; font-size: 16px; width: 100%;
+            margin-top: 12px; cursor: pointer; transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(24,119,242,0.2);
+        }
+        .fb-btn-primary:active { transform: scale(0.98); background: #166fe0; }
+
+        @media (max-width: 600px) {
+            .fb-table { font-size: 15px; }
+            .fb-table td { padding: 14px 12px; }
+            .fb-drawer { width: 260px; }
+        }
+    </style>
+</head>
+<body>
+<div class="fb-container">
+    <div class="fb-header">
+        <h1>Весенний учёт</h1>
+        <button class="menu-trigger-fb" id="menuToggleBtn">☰</button>
+    </div>
+    <div class="halls-card" id="hallButtonsContainer"></div>
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <button class="month-nav-fb" id="prevMonthFB">←</button>
+            <span class="month-year" id="monthYearDisplay">Загрузка...</span>
+            <button class="month-nav-fb" id="nextMonthFB">→</button>
+        </div>
+        <table class="calendar-table">
+            <thead><tr><th>ПН</th><th>ВТ</th><th>СР</th><th>ЧТ</th><th>ПТ</th><th>СБ</th><th>ВС</th></tr></thead>
+            <tbody id="calendarGrid"><tr><td colspan="7" style="text-align:center; padding:20px;">Загрузка календаря...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="monthly-detail-card" id="monthlyDetailCard">
+        <div class="monthly-detail-header">
+            <h3>📋 Детализация за <span id="detailMonthYear"></span></h3>
+            <button class="fb-btn-outline" id="exportDetailCSV">📥 Скачать CSV</button>
+        </div>
+        <div class="table-responsive">
+            <table class="fb-table" id="monthlyDetailTable">
+                <thead><tr><th>📅 Дата</th><th>🚕 Такси</th><th>➕ Доп. оплата</th><th>💰 Итого</th></tr></thead>
+                <tbody id="monthlyDetailBody"><tr><td colspan="4" class="empty-table-msg">Нет данных за этот месяц</td></tr>
+                </tbody>
+                <tfoot id="monthlyDetailFoot" style="display: none;"><tr class="total-row"><td><strong>Итого за месяц</strong></td><td id="totalTaxiMonth">0</td><td id="totalExtraMonth">0</td><td id="totalAllMonth">0</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Боковое меню -->
+<div class="fb-drawer" id="sideMenu">
+    <div class="drawer-header"><h3>Меню</h3></div>
+    <div class="drawer-menu-item" id="menuTransfersBtn"><span>📋</span> Перевозки</div>
+    <div class="drawer-menu-item" id="menuAdminBtn"><span>⚙️</span> Админ-панель</div>
+    <div class="drawer-menu-item" id="menuAnalyticsBtn"><span>📊</span> Аналитика</div>
+    <a href="https://vk.com/itproger_py" target="_blank" class="drawer-menu-item" id="menuContactBtn">
+        <span>💬</span> Связь
+    </a>
+    <div class="chart-inside-menu">
+        <div style="font-weight: 600; margin-bottom: 12px;">Расходы по залам</div>
+        <div class="chart-container-mobile">
+            <canvas id="expensesChartMobile"></canvas>
+        </div>
+        <div id="miniStatsTable" style="font-size: 12px; margin-top: 12px;"></div>
+        <div style="margin-top: 16px; background: #1877f2; border-radius: 24px; padding: 14px; text-align: center; color: white;">
+            <div style="font-size:12px; opacity:0.9;">Общие расходы</div>
+            <div style="font-weight:700; font-size: 22px;" id="totalExpensesAmountMobile">0 ₽</div>
+        </div>
+    </div>
+</div>
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- Админ-панель -->
+<div class="admin-drawer" id="adminDrawer">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;"><h3>Админ-панель</h3><button class="close-icon" id="closeAdminBtn">✕</button></div>
+    <div class="admin-section"><h4 style="margin-bottom:12px;">Залы</h4><div id="adminHallsList"></div><button class="fb-btn-primary" id="addHallBtn">+ Добавить зал</button></div>
+    <div class="admin-section"><h4 style="margin-bottom:12px;">Последние расходы</h4><div id="adminExpensesList"></div></div>
+    <div class="admin-section"><h4 style="margin-bottom:12px;">Система</h4><button class="fb-btn-primary" id="exportBtn">📤 Экспорт</button><button class="fb-btn-primary" style="background:#e41e3f; margin-top:12px;" id="clearAllBtn">🗑️ Очистить всё</button></div>
+</div>
+
+<!-- Модалка расходов -->
+<div id="expenseModal" class="fb-modal">
+    <div class="fb-modal-card">
+        <div class="modal-header">
+            <h3>📝 Расходы за <span id="modalDate"></span></h3>
+            <button class="close-icon" id="closeModalBtnTop">✕</button>
+        </div>
+        <div class="form-group">
+            <label>👥 Количество человек</label>
+            <input type="number" id="peopleCount" placeholder="Например: 3" value="1">
+        </div>
+        <div class="form-group">
+            <label>🚕 Такси 1</label>
+            <input type="number" id="taxi1" placeholder="Сумма">
+        </div>
+        <div class="form-group">
+            <label>🚕 Такси 2</label>
+            <input type="number" id="taxi2" placeholder="Сумма">
+        </div>
+        <div class="form-group">
+            <label>🚕 Такси 3</label>
+            <input type="number" id="taxi3" placeholder="Сумма">
+        </div>
+        <div class="calc-summary">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">Общая сумма такси: <strong id="totalTaxi">0</strong> ₽</div>
+            <div style="display:flex; justify-content:space-between;">На человека: <strong id="avgPerPerson">0</strong> ₽</div>
+        </div>
+        <div class="form-group">
+            <label>🗑️ Мусор</label>
+            <input type="number" id="garbage" placeholder="Сумма">
+        </div>
+        <div class="form-group">
+            <label>⏰ Продление</label>
+            <input type="number" id="prolong" placeholder="Сумма">
+        </div>
+        <div class="form-group">
+            <label>🧹 Доп. уборка</label>
+            <input type="number" id="extraClean" placeholder="Сумма">
+        </div>
+        <div class="total-fb">
+            ИТОГО ЗА ДЕНЬ: <span id="dayTotal">0</span> ₽
+        </div>
+        <div class="auto-save-hint">💾 Данные сохранятся автоматически при закрытии</div>
+        <button class="fb-btn-secondary" id="closeModalBtnBottom">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно аналитики -->
+<div id="analyticsModal" class="fb-modal">
+    <div class="fb-modal-card" style="max-width: 500px;">
+        <div class="modal-header">
+            <h3>📊 Свод расходов по месяцам</h3>
+            <button class="close-icon" id="closeAnalyticsBtn">✕</button>
+        </div>
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <select id="analyticsYearSelect" style="padding: 12px; border-radius: 16px; border:1px solid #e4e6eb;"><option value="2025">2025</option><option value="2026" selected>2026</option><option value="2027">2027</option></select>
+            <select id="analyticsHallSelect" style="padding: 12px; border-radius: 16px; border:1px solid #e4e6eb;"></select>
+            <button id="refreshAnalyticsBtn" class="fb-btn-primary" style="margin-top:0; padding:12px 16px; width:auto;">Обновить</button>
+        </div>
+        <div id="analyticsTableContainer">
+            <table style="width:100%; border-collapse: collapse;"><thead><tr style="background:#f7f8fa;"><th style="padding:12px; text-align:left;">Месяц</th><th style="padding:12px; text-align:right;">Расход, ₽</th></tr></thead><tbody id="analyticsTableBody"></tbody></table>
+            <div id="analyticsTotal" style="margin-top: 20px; font-weight: bold; text-align: right; font-size:18px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- Глобальные переменные ----------
+    let currentHall = 'B1';
+    let currentYear = 2026;
+    let currentMonth = 4;
+    let selectedDate = '';
+    let expensesData = {};
+    let halls = [];
+    let chartMobile = null;
+    let abortController = null;
+    const monthNames = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+    // Для отслеживания изменений в модалке
+    let originalModalData = null;
+
+    async function apiFetch(url, options = {}) {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+    }
+
+    async function loadHalls() {
+        try {
+            const data = await apiFetch('/api/get_halls');
+            halls = data;
+            if (!halls.includes(currentHall) && halls.length) currentHall = halls[0];
+            updateHallButtons();
+            await loadExpensesForCurrentHall();
+            await loadAllTotalsAndChart();
+            await loadMonthlyDetails();
+        } catch (e) {
+            console.error(e);
+            halls = ['B1','B3','B4','B5','B7'];
+            currentHall = 'B1';
+            updateHallButtons();
+            await loadExpensesForCurrentHall();
+            await loadMonthlyDetails();
+        }
+    }
+
+    async function loadExpensesForCurrentHall() {
+        try {
+            const data = await apiFetch(`/api/get_expenses/${currentHall}`);
+            expensesData = data;
+            renderCalendar();
+        } catch (e) {
+            expensesData = {};
+            renderCalendar();
+        }
+    }
+
+    function renderCalendar() {
+        const tbody = document.getElementById('calendarGrid');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const firstDay = new Date(currentYear, currentMonth - 1, 1);
+        const lastDay = new Date(currentYear, currentMonth, 0);
+        let startWeekday = firstDay.getDay() || 7;
+        const daysInMonth = lastDay.getDate();
+        let currentRow = document.createElement('tr');
+        for (let i = 1; i < startWeekday; i++) {
+            const emptyCell = document.createElement('td');
+            emptyCell.innerHTML = '<div class="cal-day-cell empty"><div class="day-number"></div></div>';
+            currentRow.appendChild(emptyCell);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const expense = expensesData[dateStr];
+            // Если запись существует (даже с нулевой суммой) — зелёный, иначе красный
+            let colorClass = expense !== undefined ? 'green' : 'red';
+            const cell = document.createElement('td');
+            cell.innerHTML = `<div class="cal-day-cell ${colorClass}" onclick="openModal('${dateStr}')"><div class="day-number">${d}</div></div>`;
+            currentRow.appendChild(cell);
+            if ((startWeekday + d - 1) % 7 === 0 && d < daysInMonth) {
+                tbody.appendChild(currentRow);
+                currentRow = document.createElement('tr');
+            }
+        }
+        const totalCells = startWeekday - 1 + daysInMonth;
+        const remainingCells = 7 - (totalCells % 7);
+        if (remainingCells < 7) {
+            for (let i = 0; i < remainingCells; i++) {
+                const emptyCell = document.createElement('td');
+                emptyCell.innerHTML = '<div class="cal-day-cell empty"><div class="day-number"></div></div>';
+                currentRow.appendChild(emptyCell);
+            }
+        }
+        if (currentRow.children.length > 0) tbody.appendChild(currentRow);
+        document.getElementById('monthYearDisplay').innerHTML = monthNames[currentMonth-1] + ' ' + currentYear;
+    }
+
+    function updateHallButtons() {
+        const container = document.getElementById('hallButtonsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        halls.forEach(hall => {
+            const btn = document.createElement('button');
+            btn.className = 'hall-btn-fb' + (hall === currentHall ? ' active' : '');
+            btn.innerText = hall;
+            btn.onclick = async () => {
+                if (selectedDate) await closeModalAndSave();
+                document.querySelectorAll('.hall-btn-fb').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentHall = hall;
+                await loadExpensesForCurrentHall();
+                await loadAllTotalsAndChart();
+                await loadMonthlyDetails();
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function getCurrentFormData() {
+        return {
+            people: parseInt(document.getElementById('peopleCount').value) || 1,
+            taxi1: parseFloat(document.getElementById('taxi1').value) || 0,
+            taxi2: parseFloat(document.getElementById('taxi2').value) || 0,
+            taxi3: parseFloat(document.getElementById('taxi3').value) || 0,
+            garbage: parseFloat(document.getElementById('garbage').value) || 0,
+            prolong: parseFloat(document.getElementById('prolong').value) || 0,
+            extra_clean: parseFloat(document.getElementById('extraClean').value) || 0
+        };
+    }
+
+    function hasFormChanged() {
+        if (!originalModalData) return true;
+        const curr = getCurrentFormData();
+        return curr.people !== originalModalData.people ||
+               curr.taxi1 !== originalModalData.taxi1 ||
+               curr.taxi2 !== originalModalData.taxi2 ||
+               curr.taxi3 !== originalModalData.taxi3 ||
+               curr.garbage !== originalModalData.garbage ||
+               curr.prolong !== originalModalData.prolong ||
+               curr.extra_clean !== originalModalData.extra_clean;
+    }
+
+    window.openModal = async function(date) {
+        if (selectedDate) await closeModalAndSave();
+        selectedDate = date;
+        document.getElementById('modalDate').innerHTML = date;
+
+        document.getElementById('peopleCount').value = '1';
+        ['taxi1','taxi2','taxi3','garbage','prolong','extraClean'].forEach(id => document.getElementById(id).value = '');
+
+        try {
+            const details = await apiFetch(`/api/get_expense_details/${currentHall}/${date}`);
+            if (details) {
+                document.getElementById('peopleCount').value = details.people;
+                document.getElementById('taxi1').value = details.taxi1;
+                document.getElementById('taxi2').value = details.taxi2;
+                document.getElementById('taxi3').value = details.taxi3;
+                document.getElementById('garbage').value = details.garbage || 0;
+                document.getElementById('prolong').value = details.prolong;
+                document.getElementById('extraClean').value = details.extra_clean;
+            }
+        } catch(e) { console.error(e); }
+
+        calculateTotals();
+        originalModalData = getCurrentFormData();
+        document.getElementById('expenseModal').style.display = 'flex';
+    };
+
+    function calculateTotals() {
+        let t1 = parseFloat(document.getElementById('taxi1').value) || 0;
+        let t2 = parseFloat(document.getElementById('taxi2').value) || 0;
+        let t3 = parseFloat(document.getElementById('taxi3').value) || 0;
+        let people = parseInt(document.getElementById('peopleCount').value) || 1;
+        let totalTaxi = t1 + t2 + t3;
+        let avg = totalTaxi / people;
+        let garbage = parseFloat(document.getElementById('garbage').value) || 0;
+        let prolong = parseFloat(document.getElementById('prolong').value) || 0;
+        let extra = parseFloat(document.getElementById('extraClean').value) || 0;
+        document.getElementById('totalTaxi').innerHTML = totalTaxi;
+        document.getElementById('avgPerPerson').innerHTML = avg.toFixed(2);
+        document.getElementById('dayTotal').innerHTML = (totalTaxi + garbage + prolong + extra).toFixed(2);
+    }
+
+    async function saveExpenseToServer(hall, date) {
+        const payload = {
+            hall, date,
+            people: parseInt(document.getElementById('peopleCount').value) || 1,
+            taxi1: parseFloat(document.getElementById('taxi1').value) || 0,
+            taxi2: parseFloat(document.getElementById('taxi2').value) || 0,
+            taxi3: parseFloat(document.getElementById('taxi3').value) || 0,
+            garbage: parseFloat(document.getElementById('garbage').value) || 0,
+            prolong: parseFloat(document.getElementById('prolong').value) || 0,
+            extra_clean: parseFloat(document.getElementById('extraClean').value) || 0
+        };
+        await apiFetch('/api/save_expense', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const total = payload.taxi1+payload.taxi2+payload.taxi3 + payload.garbage + payload.prolong + payload.extra_clean;
+        expensesData[date] = total;
+        renderCalendar();
+        await loadAllTotalsAndChart();
+        await loadMonthlyDetails();
+    }
+
+    async function deleteExpenseOnServer(hall, date) {
+        await apiFetch('/api/delete_expense', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({hall, date}) });
+        delete expensesData[date];
+        renderCalendar();
+        await loadAllTotalsAndChart();
+        await loadMonthlyDetails();
+    }
+
+    async function closeModalAndSave() {
+        if (!selectedDate) return;
+
+        if (!hasFormChanged()) {
+            document.getElementById('expenseModal').style.display = 'none';
+            selectedDate = '';
+            originalModalData = null;
+            return;
+        }
+
+        let total = parseFloat(document.getElementById('dayTotal').innerHTML) || 0;
+        if (total === 0) {
+            if (expensesData[selectedDate] !== undefined) {
+                await deleteExpenseOnServer(currentHall, selectedDate);
+            }
+        } else {
+            await saveExpenseToServer(currentHall, selectedDate);
+        }
+
+        document.getElementById('expenseModal').style.display = 'none';
+        selectedDate = '';
+        originalModalData = null;
+    }
+
+    async function loadAllTotalsAndChart() {
+        try {
+            const totals = await apiFetch('/api/get_all_totals');
+            const totalSum = Object.values(totals).reduce((a,b) => a+b, 0);
+            document.getElementById('totalExpensesAmountMobile').innerText = totalSum.toLocaleString() + ' ₽';
+            let miniHtml = '';
+            for (let hall of halls) {
+                let amount = totals[hall] || 0;
+                let percent = totalSum > 0 ? ((amount/totalSum)*100).toFixed(1) : 0;
+                miniHtml += `<div style="display:flex; justify-content:space-between;"><span>${hall}</span><span>${amount.toLocaleString()}₽ (${percent}%)</span></div>`;
+            }
+            document.getElementById('miniStatsTable').innerHTML = miniHtml;
+            const canvas = document.getElementById('expensesChartMobile');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const labels = halls;
+            const data = halls.map(h => totals[h] || 0);
+            if (chartMobile) chartMobile.destroy();
+            chartMobile = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels,
+                    datasets: [{
+                        data,
+                        backgroundColor: ['#1877f2','#42b72a','#f02849','#f5b042','#9b59b6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 8, font: { size: 10 } }
+                        }
+                    },
+                    cutout: '55%'
+                }
+            });
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadMonthlyDetails() {
+        if (abortController) abortController.abort();
+        abortController = new AbortController();
+        try {
+            const data = await apiFetch(`/api/get_monthly_details/${currentHall}/${currentYear}/${currentMonth}`, { signal: abortController.signal });
+            const tbody = document.getElementById('monthlyDetailBody');
+            const foot = document.getElementById('monthlyDetailFoot');
+            document.getElementById('detailMonthYear').textContent = `${monthNames[currentMonth-1]} ${currentYear}`;
+
+            const grouped = new Map();
+            data.forEach(row => {
+                const date = row.date;
+                if (grouped.has(date)) {
+                    const existing = grouped.get(date);
+                    existing.taxi_total += row.taxi_total;
+                    existing.extra += row.extra;
+                    existing.total_day += row.total_day;
+                } else {
+                    grouped.set(date, {
+                        taxi_total: row.taxi_total,
+                        extra: row.extra,
+                        total_day: row.total_day
+                    });
+                }
+            });
+
+            const sortedDates = Array.from(grouped.keys()).sort();
+            tbody.innerHTML = '';
+            if (sortedDates.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-table-msg">Нет данных за этот месяц</td></tr>';
+                foot.style.display = 'none';
+                return;
+            }
+
+            let sumTaxi = 0, sumExtra = 0, sumAll = 0;
+            sortedDates.forEach(date => {
+                const row = grouped.get(date);
+                const d = new Date(date);
+                const formatted = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${formatted}</td><td>${row.taxi_total.toFixed(2)} ₽</td><td>${row.extra.toFixed(2)} ₽</td><td>${row.total_day.toFixed(2)} ₽</td>`;
+                tbody.appendChild(tr);
+                sumTaxi += row.taxi_total;
+                sumExtra += row.extra;
+                sumAll += row.total_day;
+            });
+
+            document.getElementById('totalTaxiMonth').textContent = sumTaxi.toFixed(2) + ' ₽';
+            document.getElementById('totalExtraMonth').textContent = sumExtra.toFixed(2) + ' ₽';
+            document.getElementById('totalAllMonth').textContent = sumAll.toFixed(2) + ' ₽';
+            foot.style.display = 'table-footer-group';
+        } catch (e) {
+            if (e.name === 'AbortError') return;
+            console.error(e);
+            document.getElementById('monthlyDetailBody').innerHTML = '<tr><td colspan="4" class="empty-table-msg">Ошибка загрузки</td></tr>';
+            foot.style.display = 'none';
+        } finally {
+            abortController = null;
+        }
+    }
+
+    function exportToCSV() {
+        const rows = [[`Детализация расходов: ${currentHall} - ${monthNames[currentMonth-1]} ${currentYear}`], ['Дата', 'Такси (₽)', 'Доп. оплата (₽)', 'Итого (₽)']];
+        let sumTaxi = 0, sumExtra = 0, sumAll = 0;
+        document.querySelectorAll('#monthlyDetailBody tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length === 4 && !tds[0].classList.contains('empty-table-msg')) {
+                const date = tds[0].textContent;
+                const taxi = parseFloat(tds[1].textContent) || 0;
+                const extra = parseFloat(tds[2].textContent) || 0;
+                const total = parseFloat(tds[3].textContent) || 0;
+                rows.push([date, taxi.toFixed(2), extra.toFixed(2), total.toFixed(2)]);
+                sumTaxi += taxi; sumExtra += extra; sumAll += total;
+            }
+        });
+        rows.push(['Итого', sumTaxi.toFixed(2), sumExtra.toFixed(2), sumAll.toFixed(2)]);
+        const blob = new Blob(['\uFEFF' + rows.map(r => r.join(';')).join('\n')], {type: 'text/csv;charset=utf-8;'});
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `expenses_${currentHall}_${currentYear}_${currentMonth}.csv`; a.click(); URL.revokeObjectURL(a.href);
+    }
+
+    // ---------- Аналитика, Админка ----------
+    async function loadAnalytics(hall, year) {
+        const data = await apiFetch(`/api/monthly_summary/${hall}/${year}`);
+        const tbody = document.getElementById('analyticsTableBody');
+        tbody.innerHTML = ''; let total = 0;
+        for (let m=1; m<=12; m++) { let amount = data[m]||0; total += amount; tbody.insertAdjacentHTML('beforeend', `<tr><td style="padding:12px;">${monthNames[m-1]}</td><td style="padding:12px; text-align:right;">${amount.toLocaleString()} ₽</td></tr>`); }
+        document.getElementById('analyticsTotal').innerHTML = `Итого: ${total.toLocaleString()} ₽`;
+    }
+    async function openAnalytics() {
+        const sel = document.getElementById('analyticsHallSelect'); sel.innerHTML = ''; halls.forEach(h => { const o = document.createElement('option'); o.value=h; o.textContent=h; if(h===currentHall) o.selected=true; sel.appendChild(o); });
+        await loadAnalytics(sel.value, document.getElementById('analyticsYearSelect').value);
+        document.getElementById('analyticsModal').style.display = 'flex';
+    }
+    async function loadAdminData() {
+        let hallsHtml = ''; halls.forEach(h => hallsHtml += `<div class="admin-item"><span>${h}</span><div><button class="close-icon" onclick="renameHall('${h}')" style="margin-right:8px;">✎</button><button class="close-icon" onclick="deleteHall('${h}')">✕</button></div></div>`);
+        document.getElementById('adminHallsList').innerHTML = hallsHtml;
+        let expHtml = '', all=[]; for (let hall of halls) { const e = await apiFetch(`/api/get_expenses/${hall}`); for (let [d,amt] of Object.entries(e)) all.push({hall,date:d,amount:amt}); }
+        all.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).forEach(e => expHtml += `<div class="admin-item"><span>${e.hall} ${e.date}: ${e.amount}₽</span><button class="close-icon" onclick="deleteExpenseAdmin('${e.hall}','${e.date}')">✕</button></div>`);
+        document.getElementById('adminExpensesList').innerHTML = expHtml || '<div style="padding:16px; text-align:center;">Нет расходов</div>';
+    }
+    window.deleteExpenseAdmin = async (h,d) => { await deleteExpenseOnServer(h,d); await loadAdminData(); if(currentHall===h) await loadExpensesForCurrentHall(); };
+    window.renameHall = async (old) => { let n = prompt('Новое имя', old); if(n && n!==old && !halls.includes(n)) { await apiFetch('/api/rename_hall', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({old_name:old, new_name:n})}); if(currentHall===old) currentHall=n; await loadHalls(); if(document.getElementById('adminDrawer').classList.contains('open')) await loadAdminData(); } };
+    window.deleteHall = async (h) => { if(halls.length<=1) return alert('Нельзя удалить единственный зал'); if(confirm(`Удалить зал ${h}?`)) { await apiFetch('/api/delete_hall', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:h})}); if(currentHall===h) currentHall = halls.find(x=>x!==h); await loadHalls(); if(document.getElementById('adminDrawer').classList.contains('open')) await loadAdminData(); } };
+    async function addNewHall() { let n = prompt('Название'); if(n && !halls.includes(n)) { await apiFetch('/api/add_hall', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:n})}); await loadHalls(); if(document.getElementById('adminDrawer').classList.contains('open')) await loadAdminData(); } }
+    async function exportAllData() { const d = await apiFetch('/api/export_all_data'); const b = new Blob([JSON.stringify(d,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); }
+    async function clearAllData() { if(confirm('Удалить все расходы?')) { await apiFetch('/api/clear_all_data', {method:'POST'}); await loadExpensesForCurrentHall(); await loadAllTotalsAndChart(); await loadMonthlyDetails(); if(document.getElementById('adminDrawer').classList.contains('open')) await loadAdminData(); } }
+
+    // ---------- Инициализация ----------
+    (async function() {
+        await loadHalls();
+
+        document.getElementById('prevMonthFB').onclick = async () => {
+            if (selectedDate) await closeModalAndSave();
+            if(currentMonth===1) { currentMonth=12; currentYear--; } else currentMonth--;
+            await loadExpensesForCurrentHall();
+            await loadMonthlyDetails();
+        };
+        document.getElementById('nextMonthFB').onclick = async () => {
+            if (selectedDate) await closeModalAndSave();
+            if(currentMonth===12) { currentMonth=1; currentYear++; } else currentMonth++;
+            await loadExpensesForCurrentHall();
+            await loadMonthlyDetails();
+        };
+
+        document.getElementById('exportDetailCSV').onclick = exportToCSV;
+        document.getElementById('menuToggleBtn').onclick = ()=> { document.getElementById('sideMenu').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); };
+        document.getElementById('drawerOverlay').onclick = ()=> { document.getElementById('sideMenu').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); };
+        document.getElementById('menuTransfersBtn').onclick = ()=> location.href='/transfers';
+        document.getElementById('menuAdminBtn').onclick = ()=> { document.getElementById('sideMenu').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('adminDrawer').classList.add('open'); loadAdminData(); };
+        document.getElementById('closeAdminBtn').onclick = ()=> document.getElementById('adminDrawer').classList.remove('open');
+        document.getElementById('menuAnalyticsBtn').onclick = ()=> { document.getElementById('sideMenu').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); openAnalytics(); };
+        document.getElementById('closeAnalyticsBtn').onclick = ()=> document.getElementById('analyticsModal').style.display='none';
+        document.getElementById('refreshAnalyticsBtn').onclick = async ()=> { const y = document.getElementById('analyticsYearSelect').value; const h = document.getElementById('analyticsHallSelect').value; await loadAnalytics(h,y); };
+        document.getElementById('addHallBtn').onclick = addNewHall;
+        document.getElementById('exportBtn').onclick = exportAllData;
+        document.getElementById('clearAllBtn').onclick = clearAllData;
+
+        document.getElementById('closeModalBtnTop').onclick = closeModalAndSave;
+        document.getElementById('closeModalBtnBottom').onclick = closeModalAndSave;
+
+        window.onclick = e => { if(e.target.classList.contains('fb-modal')) closeModalAndSave(); };
+
+        ['peopleCount','taxi1','taxi2','taxi3','garbage','prolong','extraClean'].forEach(id => document.getElementById(id).oninput = calculateTotals);
+    })();
+</script>
+</body>
+</html>
